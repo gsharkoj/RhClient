@@ -38,8 +38,6 @@ namespace RhClient
         Boolean send_echo = true;
         ClientType Client_type = ClientType.Undefine;        
 
-        //List<int> list_echo_val = new List<int>();
-
         DateTime datetime_send_echo;
 
         Int32 Draw_mouse = 1;
@@ -71,8 +69,6 @@ namespace RhClient
 
         public string clipboard_string = "";
 
-       // int old_x = 0, old_y = 0;
-
         byte[] Buffer_line = null;
         Int32 Buffer_line_index = 0;
         const int buf_gz_length = 8192 * 2;
@@ -88,7 +84,6 @@ namespace RhClient
 
         private static object critical_sektion = new object();
         private PlatformInvokeUSER32.CURSORINFO pci_cursor;
-
 
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
         static extern int memcmp(IntPtr b1, IntPtr b2, long count);
@@ -329,7 +324,6 @@ namespace RhClient
                     NetworkStream client_stream = client.GetStream();                    
                     Byte[] byte_to_send = GetSimpleData(Command.set_mouse, Data);
                     // отправляем данные мыши
-                    //if (mouse_send)
                     while (client_stream.CanWrite == false);
                     if (fast_send)
                     {
@@ -587,8 +581,7 @@ namespace RhClient
             Size_H = BitConverter.ToInt32(Buf_Head, 4); // H
             len_x = BitConverter.ToInt32(Buf_Head, 8); // len_x
             byte_per_pixel = BitConverter.ToInt32(Buf_Head, 12); // byte_per_pixel
-            
-            
+                       
             // выделяем память
             int w_count = Size_W / len_x;
             image_data_unzip = new Byte[4 * w_count * Size_H + Size_W * Size_H * byte_per_pixel];
@@ -704,11 +697,9 @@ namespace RhClient
 
             int answer = BitConverter.ToInt32(Buf_Head, 0);
             if ((ResultConnection)answer == ResultConnection.ok)
-            {
-                //ShowMessageBox("Подключено", "Соединение", MessageBoxIcon.Information);                
+            {            
                 Thread.Sleep(100);
-                // запрашиваем параметры картинки
-                
+                // запрашиваем параметры картинки                
                 byte[] data = new byte[12];
                 Buffer.BlockCopy(BitConverter.GetBytes(scale_width_send), 0, data, 0, 4); // width scale
                 Buffer.BlockCopy(BitConverter.GetBytes(scale_height_send), 0, data, 4, 4); // height scale
@@ -741,7 +732,6 @@ namespace RhClient
                     bool error = false;
                     if (Buf_len != 0 && BitConverter.ToInt32(image_data_zip, 0) != 0)
                     {
-                        // image_data_unzip
                         var ms_in = new MemoryStream(image_data_zip);
                         GZipStream stream = new GZipStream(ms_in, CompressionMode.Decompress, true);
                         try
@@ -778,11 +768,7 @@ namespace RhClient
                                 if (offset_write == offset)
                                     break;
                                 int index = BitConverter.ToInt32(image_data_unzip, offset_write);
-                                /*if (index < 0 || index + index_j > Form_View.Data_image_byte.Length)
-                                {
-                                    error = true;
-                                    continue;
-                                }*/
+
                                 offset_write = offset_write + 4;
                                 Buffer.BlockCopy(image_data_unzip, offset_write, Form_View.Data_image_byte, index, index_j);
                                 offset_write = offset_write + index_j;
@@ -820,7 +806,6 @@ namespace RhClient
             int len = ReadData(client_stream, ref Buf_Read);
 
             //image_update = true;
-            //SendEcho();
 
             return 4;
         }
@@ -886,10 +871,6 @@ namespace RhClient
         {
             byte[] Buf_Read = null;
             int len = ReadData(client_stream, ref Buf_Read);
-
-            //if (Form_View != null)
-              //  Form_View.mouse_move_upload = true;
-
             return len;
         }
 
@@ -913,21 +894,6 @@ namespace RhClient
 
             int val = (int)(t.TotalMilliseconds / 2);
             
-            /*list_echo_val.Add(val);
-            if (list_echo_val.Count > 3)
-            {
-                list_echo_val.Reverse();
-                list_echo_val.RemoveAt(3);
-            }
-
-            int avg = 0;
-            foreach (int v in list_echo_val)
-                avg = avg + v;
-            avg = avg / list_echo_val.Count;
-            SetID(avg.ToString());
-
-            val = avg;*/
-
             if (val < sleep_param_screen_min)
             {
                 sleep_param_screen = sleep_param_screen_min;
@@ -1094,8 +1060,6 @@ namespace RhClient
                 error = true;
             }
 
-            /*if (error)
-            {*/
                 OpenViewForm(false);
                 if (client_stream != null)
                 {
@@ -1113,12 +1077,9 @@ namespace RhClient
                         client = null;
                     }
                 }
-                //if (!CloseForm)
-               // {
-                    SetID("");
-                    ButtonStateConnection(true);
-               // }
-            //}
+
+                SetID("");
+                ButtonStateConnection(true);
         }
 
         Boolean SendBuf(Byte[] data, NetworkStream client_stream)
@@ -1280,23 +1241,12 @@ namespace RhClient
                     Form_View.Owner = this;
                     Form_View.SetParam(Size_W, Size_H, len_x, byte_per_pixel, setting_mouse_move);
                     if (Size_W < Screen.PrimaryScreen.Bounds.Width-20 && Size_H < Screen.PrimaryScreen.Bounds.Height-20)
-                    {
-                        //Size s = Form_View.Size;
-                        //s.Width = Size_W;
-                        //s.Height = Size_H+60;
-                        //Form_View.Size = s;
                         Form_View.SetPicrtureSize(new Size(Size_W, Size_H));
-                    }
                     else
                     {
                         Size s = Form_View.Size;
-                        s.Width = Size_W;
-                        s.Height = Size_H;
-                        /*
-                        int dh = (Screen.PrimaryScreen.Bounds.Height - 150) - s.Height;
-                        float k = (float)(Size_W) / (float)(Size_H == 0 ? 1 : Size_H);
-                        s.Width = s.Width + (int)(dh * k);
-                        */
+                        //s.Width = Size_W;
+                        //s.Height = Size_H;
                         s.Height = (Screen.PrimaryScreen.Bounds.Height - 100 + 60);
                         s.Width = (Screen.PrimaryScreen.Bounds.Width - 100);
 
@@ -1405,49 +1355,9 @@ namespace RhClient
                     hook_mouse_y = y;
                     manage_mouse_data_update = true;
 
-
-                  //  PlatformInvokeUSER32.InvalidateRect(IntPtr.Zero, IntPtr.Zero, true);
-                   /* IntPtr hwnd = PlatformInvokeUSER32.GetDesktopWindow();
-                    IntPtr p = PlatformInvokeUSER32.GetDCEx(hwnd, IntPtr.Zero, 1027);
-                    Graphics g = Graphics.FromHdc(p);
-                    */
-                    /*
-                    if (old_x != 0)
-                    {
-                        double delta_x = (x - old_x) / 10;
-                        double delta_y = (y - old_y) / 10;
-                        double xx = old_x;
-                        double yy = old_y;
-                        for (int i = 0; i < 8; i++)
-                        {
-                            MouseKeyboardLibrary.MouseSimulator.Position = new Point((int)xx, (int)yy);
-                           // g.DrawRectangle(Pens.Red, (int)xx, (int)yy, 2, 2);
-                            xx = xx + delta_x;
-                            yy = yy + delta_y;
-                        }
-                        //g.DrawRectangle(Pens.Red, x, y, 2, 2);
-                        MouseKeyboardLibrary.MouseSimulator.Position = new Point(x, y);
-                    }
-                    else
-                    {
-                        //g.DrawRectangle(Pens.Red, x, y, 2, 2);
-                        MouseKeyboardLibrary.MouseSimulator.Position = new Point(x, y);
-                    }
-                    
-                    /*
-                    PlatformInvokeUSER32.ReleaseDC(hwnd, p);
-                    g.Dispose();
-                    g = null;
-                    
-                   old_x = x;
-                    old_y = y;
-                    */
                     break;
 
                 case (int)MouseCommand.move_client:
-
-                    //x = (int)(Math.Round(1.0f * BitConverter.ToInt32(data, 4) * scale_x, 0));
-                    //y = (int)(Math.Round(1.0f * BitConverter.ToInt32(data, 8) * scale_y, 0));
                     x = (int)(Math.Round(1.0f * BitConverter.ToInt32(data, 4), 0));
                     y = (int)(Math.Round(1.0f * BitConverter.ToInt32(data, 8), 0));
                     int index = BitConverter.ToInt32(data, 12);
@@ -1556,19 +1466,7 @@ namespace RhClient
                     x = BitConverter.ToInt32(data, 4);
                     y = BitConverter.ToInt32(data, 8);
 
-                    /*
-                    if ((Keys)y == Keys.Control && (Keys)x == Keys.V && data.Length > 12)
-                    {                       
-                        string s = UTF8Encoding.UTF8.GetString(data, 12, data.Length - 12);
-                        
-                        Thread thread = new Thread(() => Clipboard.SetText(s));
-                        thread.SetApartmentState(ApartmentState.STA); //Set the thread to STA
-                        thread.Start();
-                        thread.Join();                          
-                    }
-                    */
-                   if (//(Keys)y != Keys.None && 
-                       ((Keys)x == Keys.Home || 
+                   if (((Keys)x == Keys.Home || 
                         (Keys)x == Keys.End || 
                         (Keys)x == Keys.Left || 
                         (Keys)x == Keys.Right ||
@@ -1585,49 +1483,11 @@ namespace RhClient
                         ext = true;
                     }
 
-                  /* if (((Keys)x == Keys.ControlKey ||
-                   (Keys)x == Keys.ShiftKey ||
-                   (Keys)x == Keys.RControlKey ||
-                   (Keys)x == Keys.RShiftKey ||
-                   (Keys)x == Keys.LControlKey ||
-                   (Keys)x == Keys.LShiftKey) && ((Keys)y != Keys.None))
-                   {
-                       ext = true;
-                   }*/
-
-                  /*  if (//(Keys)y != Keys.None &&
-    ((Keys)x == Keys.Home || ((Keys)y == Keys.Home ||
-    (Keys)x == Keys.End || (Keys)y == Keys.End ||
-    (Keys)x == Keys.Left || (Keys)y == Keys.Left ||
-    (Keys)x == Keys.Right || (Keys)y == Keys.Right ||
-    (Keys)x == Keys.Up || (Keys)y == Keys.Up ||
-    (Keys)x == Keys.Control || (Keys)y == Keys.Control ||
-    (Keys)x == Keys.ControlKey || (Keys)y == Keys.ControlKey ||
-    (Keys)x == Keys.Alt || (Keys)y == Keys.Alt ||
-    (Keys)x == Keys.Shift || (Keys)y == Keys.Shift ||
-    (Keys)x == Keys.ShiftKey || (Keys)y == Keys.ShiftKey ||
-    (Keys)x == Keys.RControlKey || (Keys)y == Keys.RControlKey ||
-    (Keys)x == Keys.RShiftKey || (Keys)y == Keys.RShiftKey ||
-    (Keys)x == Keys.LControlKey || (Keys)y == Keys.LControlKey ||
-    (Keys)x == Keys.LShiftKey || (Keys)y == Keys.LShiftKey ||
-    (Keys)x == Keys.Down || (Keys)y == Keys.Down ||
-    (Keys)x == Keys.PageUp || (Keys)y == Keys.PageUp ||
-    (Keys)x == Keys.Delete || (Keys)y == Keys.Delete ||
-    (Keys)x == Keys.Insert || (Keys)y == Keys.Insert ||
-    (Keys)x == Keys.PageDown) || (Keys)y == Keys.PageDown))
-                    {
-                        ext = true;
-                    }
-                    */
                     if ((Keys)y != Keys.None)
                         MouseKeyboardLibrary.KeyboardSimulator.KeyDown((Keys)y);
-                        //InputSimulator.SimulateKeyDown((ushort)y);
 
                     if ((Keys)x != Keys.None)
                         MouseKeyboardLibrary.KeyboardSimulator.KeyDown((Keys)x, ext);
-                        //InputSimulator.SimulateKeyDown((ushort)x);
-
-
 
                     break;
 
@@ -1686,7 +1546,7 @@ namespace RhClient
                     // директории
                     List<ElementFile> elements = FileTransfer.ListDir(path);
 
-                        // сериализация
+                        // серbализация
                         byte[] byte_elements = FileTransfer.SerializeObject(elements);
                         elements.Clear();
                         // отправляем данные
@@ -1710,7 +1570,7 @@ namespace RhClient
                         {
                             lock (data)
                             {
-                                // дериализация
+                                // десериализация
                                 List<ElementFile> elements_out = FileTransfer.DeserializeList(data, 8, len);
                                 Form_FileTransfer.SetViewList(elements_out);
                             }
