@@ -230,7 +230,6 @@ namespace RhClient
             try
             {
                 string sURL;
-                //sURL = @"http://www.consult-inform.com/rdp";
                 sURL = setting_url;
 
                 wrGETURL = WebRequest.Create(sURL);
